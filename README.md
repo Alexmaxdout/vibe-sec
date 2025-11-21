@@ -29,4 +29,41 @@ The system provides **per‑chunk analysis**, labeling each section as **safe** 
 ---
 
 # 🏗 System Architecture
+      ┌──────────────────┐
+      │     Frontend     │
+      │    React App     │
+      └────────┬─────────┘
+               │
+ HTTP POST /analyze
+               │
+      ┌────────▼─────────┐
+      │     Backend       │
+      │   Node.js API     │
+      └────────┬─────────┘
+               │
+ POST → Python Model (/generate)
+               │
+      ┌────────▼─────────┐
+      │  Model Server     │
+      │   Flask + LoRA    │
+      └───────────────────┘
+               │
+     Chunked analysis JSON
 
+
+### Components
+- **React frontend** – UI for code input + viewing results  
+- **Node.js backend** – API gateway to Python model  
+- **Python Flask server** – Runs classifier + LLM explanation generator  
+- **Ngrok tunnel** – Exposes local model server to backend  
+
+---
+
+# 🔍 How It Works (Technical)
+
+## 1. Code Chunking
+The backend splits user code into 20–40 line chunks:
+
+```python
+def chunk_by_lines(code, max_lines=20):
+    ...
